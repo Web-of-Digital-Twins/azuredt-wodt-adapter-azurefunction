@@ -1,0 +1,79 @@
+name: Build and Release
+
+on:
+  push:
+    paths-ignore:
+      - '.gitignore'
+      - '.mergify.yml'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+      - 'README.md'
+      - 'renovate.json'
+  pull_request:
+
+env:
+  DOTNET_VERSION: 8.0.x
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Setup DotNet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Build the function
+        shell: bash
+        run: |
+          dotnet build --configuration Release --output ./output
+         
+  release:
+    concurrency:
+        # Allow only one release at a time.
+        group: release-${{ github.event.number || github.ref }}
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    # Release only where secrets are available.
+    if: >-
+      !github.event.repository.fork
+      && (
+        github.event_name != 'pull_request'
+        || github.event.pull_request.head.repo.full_name == github.repository
+      )
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEPLOYMENT_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+      - name: Find the version of Node from package.json
+        id: node-version
+        run: echo "version=$(jq -r .engines.node package.json)" >> $GITHUB_OUTPUT
+      - name: Install Node
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: ${{ steps.node-version.outputs.version }}
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOYMENT_TOKEN }}
+        run: |
+          npm install
+          npx semantic-release
+
+  success:
+      runs-on: ubuntu-24.04
+      needs:
+        - build
+        - release
+      if: >-
+        always() && (
+          contains(join(needs.*.result, ','), 'failure')
+          || !contains(join(needs.*.result, ','), 'cancelled')
+        )
+      steps:
+        - name: Verify that there were no failures
+          run: ${{ !contains(join(needs.*.result, ','), 'failure') }}
