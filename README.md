@@ -3,7 +3,7 @@
 [![License: Apache License](https://img.shields.io/badge/License-Apache_License_2.0-yellow.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 ![Version](https://img.shields.io/github/v/release/Web-of-Digital-Twins/azuredt-wodt-adapter-azurefunction?style=plastic)
 
-The Azure Function to deploy in the Azure pipeline to work with the azuredt-wodt-adapter.
+The Azure Function to deploy in the Azure pipeline to work with the [`azuredt-wodt-adapter`](https://github.com/Web-of-Digital-Twins/azuredt-wodt-adapter).
 
 ## Architecture
 The minimal pipeline to make it works is composed by four services:
@@ -13,9 +13,8 @@ The minimal pipeline to make it works is composed by four services:
 4. [**Azure SignalR**](https://learn.microsoft.com/en-us/azure/azure-signalr/): it is used to make data observable.
 
 In the following, an image depicting this architecture:
-<center>
-    <img src="./imgs/prototype_adt_dt.jpg" alt="azure architecture" width="50%"/>
-</center>
+
+<img src="./imgs/prototype_adt_dt.jpg" alt="azure architecture" width="50%"/>
 
 ## Function Configuration
 It requires the following environmental variables:
