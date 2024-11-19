@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "azuredt_wodt_adapter_azurefunction": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7010",
+      "launchBrowser": false
+    }
+  }
+}
